@@ -3,16 +3,21 @@ package br.com.qwa.application.repository;
 import br.com.qwa.domain.Candidato;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface CanditadoRepository {
 
-    void inserir(Candidato candidato);
+    List<Candidato> obterTodos();
 
-    Candidato obterPorCpf(String cpf);
+    Optional<Candidato> obterPorCpf(String cpf);
 
     List<Candidato> obterPorNome(String nome);
 
-    void atualizar(Candidato candidato);
+    Optional<Candidato> inserir(Candidato candidato);
+
+    void inserirLista(List<Candidato> candidatos);
+
+    Optional<Candidato> atualizar(String cpf, Candidato candidato);
 
     void deletar(String cpf);
 
