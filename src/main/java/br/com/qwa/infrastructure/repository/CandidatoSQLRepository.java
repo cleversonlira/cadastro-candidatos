@@ -31,11 +31,11 @@ public class CandidatoSQLRepository implements CanditadoRepository {
     private final String OBTER_POR_NOME = """
             SELECT cpf, nome, sobrenome, data_nascimento
             FROM candidatos
-            WHERE nome LIKE '%?%' || sobrenome LIKE '%?%';
+            WHERE nome LIKE ? || sobrenome LIKE ?;
             """;
 
     private final String OBTER_TODOS = """
-            SELECT cpf, nome, sobrenome, data_nascimento
+            SELECT *
             FROM candidatos;
             """;
 
@@ -61,7 +61,7 @@ public class CandidatoSQLRepository implements CanditadoRepository {
             while (resultSet.next()) {
                 candidatos.add(preencherCandidato(resultSet));
             }
-            Log.info("[CANDIDATO-REPOSITORY] Candidatos obtido com sucesso!");
+            Log.info("[CANDIDATO-REPOSITORY] Candidatos obtidos com sucesso!");
         } catch (SQLException e) {
             Log.info("[CANDIDATO-REPOSITORY] Erro ao obter candidatos!!", e);
         }
@@ -84,7 +84,7 @@ public class CandidatoSQLRepository implements CanditadoRepository {
         } catch (SQLException e) {
             Log.info("[CANDIDATO-REPOSITORY] Erro ao obter candidato!!", e);
         }
-        return Optional.of(null);
+        return Optional.ofNullable(null);
     }
 
     @Override
@@ -93,8 +93,8 @@ public class CandidatoSQLRepository implements CanditadoRepository {
         List<Candidato> candidatos = new ArrayList<>();
         try (Connection connection = dataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(OBTER_POR_NOME)) {
-            statement.setString(1, nome);
-            statement.setString(2, nome);
+            statement.setString(1, concatenarOperadorLike(nome));
+            statement.setString(2, concatenarOperadorLike(nome));
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 candidatos.add(preencherCandidato(resultSet));
@@ -118,7 +118,7 @@ public class CandidatoSQLRepository implements CanditadoRepository {
         } catch (SQLException e) {
             Log.info("[CANDIDATO-REPOSITORY] Erro ao inserir candidato!!", e);
         }
-        return Optional.of(null);
+        return Optional.ofNullable(null);
     }
 
     @Override
@@ -131,15 +131,15 @@ public class CandidatoSQLRepository implements CanditadoRepository {
         Log.info("[CANDIDATO-REPOSITORY] Atualizando candidato...");
         try (Connection connection = dataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(ATUALIZAR)) {
-            preencherQuery(candidato, statement);
             statement.setString(5, cpf);
-            statement.execute();
+            preencherQuery(candidato, statement);
+            statement.executeUpdate();
             Log.info("[CANDIDATO-REPOSITORY] Candidato atualizado com sucesso!");
             return Optional.of(candidato);
         } catch (SQLException e) {
-            Log.info("[CANDIDATO-REPOSITORY] Erro ao inserir candidato!!", e);
+            Log.info("[CANDIDATO-REPOSITORY] Erro ao atualizar candidato!!", e);
         }
-        return Optional.of(null);
+        return Optional.ofNullable(null);
     }
 
     @Override
@@ -155,17 +155,21 @@ public class CandidatoSQLRepository implements CanditadoRepository {
     }
 
     private void preencherQuery(Candidato candidato, PreparedStatement statement) throws SQLException {
-        statement.setString(1, candidato.getCpf());
-        statement.setString(2, candidato.getNome());
-        statement.setString(3, candidato.getSobrenome());
-        statement.setDate(4, Date.valueOf(candidato.getDataNascimento()));
+        statement.setString(1, candidato.cpf());
+        statement.setString(2, candidato.nome());
+        statement.setString(3, candidato.sobrenome());
+        statement.setDate(4, Date.valueOf(candidato.dataNascimento()));
     }
 
     private Candidato preencherCandidato(ResultSet resultSet) throws SQLException {
-        return Candidato.criar(
+        return new Candidato(
                 resultSet.getString("nome"),
                 resultSet.getString("sobrenome"),
                 resultSet.getString("cpf"),
                 resultSet.getDate("data_nascimento").toLocalDate());
+    }
+
+    private String concatenarOperadorLike(String nome) {
+        return "%" + nome + "%";
     }
 }
