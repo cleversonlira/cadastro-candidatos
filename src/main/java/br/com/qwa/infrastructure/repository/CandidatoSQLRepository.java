@@ -149,6 +149,7 @@ public class CandidatoSQLRepository implements CanditadoRepository {
              PreparedStatement statement = connection.prepareStatement(DELETAR)) {
             statement.setString(1, cpf);
             statement.execute();
+            Log.info("[CANDIDATO-REPOSITORY] Candidato removido com sucesso...");
         } catch (SQLException e) {
             Log.info("[CANDIDATO-REPOSITORY] Erro ao remover candidato!!", e);
         }

@@ -19,7 +19,7 @@ public class CandidatoResource {
     CandidatoService service;
 
     @GET
-    public List<CandidatoDTO> listar(@QueryParam("nome") String nome) {
+    public Response listar(@QueryParam("nome") String nome) {
         return service.listar(nome);
     }
 
