@@ -1,7 +1,9 @@
 package br.com.qwa.interfaces.resources;
 
+import br.com.qwa.application.dto.UsuarioDTO;
 import br.com.qwa.domain.Usuario;
 import br.com.qwa.infrastructure.repository.UsuarioRepository;
+import br.com.qwa.interfaces.dto.UsuarioFormDTO;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -9,7 +11,6 @@ import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.List;
 import java.util.Optional;
 
 @Path("/usuarios")
@@ -22,20 +23,24 @@ public class UsuarioResource {
 
     @GET
     @Path("{id}")
-    public Usuario buscar(@PathParam("id") Long id) {
-        return repository.findById(id);
+    public Response buscar(@PathParam("id") Long id) {
+        Optional<Usuario> usuario = repository.findByIdOptional(id);
+        return usuario.isPresent()
+                ? Response.ok(new UsuarioDTO(usuario.get())).build()
+                : Response.status(404).build();
     }
 
     @GET
-    public List<Usuario> listar() {
-        return repository.listAll();
+    public Response listar() {
+        return Response.ok(UsuarioDTO.dtoList(repository.listAll())).build();
     }
 
     @POST
     @Transactional
-    public Response inserir(@Valid Usuario usuario) {
+    public Response inserir(@Valid UsuarioFormDTO dto) {
+        Usuario usuario = dto.toEntity();
         repository.persist(usuario);
-        return Response.ok().build();
+        return Response.ok(new UsuarioDTO(repository.findByUsername(usuario.getUsername()))).build();
     }
 
     @PUT
@@ -43,21 +48,16 @@ public class UsuarioResource {
     @Path("{id}")
     public Response atualizar(@PathParam("id") Long id, @Valid Usuario atualizado) {
         Optional<Usuario> usuario = repository.findByIdOptional(id);
-        if (usuario.isPresent()) {
-            usuario.get().setUsername(atualizado.getUsername());
-            usuario.get().setSenha(atualizado.getSenha());
-            usuario.get().setRole(atualizado.getRole());
-            return Response.ok(usuario.get()).build();
-        }
-        return Response.status(404).build();
+        return usuario.isPresent()
+                ? Response.ok(new UsuarioDTO(usuario.get())).build()
+                : Response.status(404).build();
     }
 
     @DELETE
     @Transactional
     @Path("{id}")
     public Response atualizar(@PathParam("id") Long id) {
-        Optional<Usuario> usuario = repository.findByIdOptional(id);
-        if (usuario.isPresent()) {
+        if (repository.findByIdOptional(id).isPresent()) {
             repository.deleteById(id);
             return Response.noContent().build();
         }

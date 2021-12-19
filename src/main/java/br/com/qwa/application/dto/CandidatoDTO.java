@@ -16,7 +16,7 @@ public class CandidatoDTO {
     public String nome;
     @NotBlank(message = "Sobrenome é obrigatório")
     public String sobrenome;
-    @CPF
+    @CPF(message = "CPF inválido")
     public String cpf;
     @NotNull(message = "Data de nascimento é obrigatória")
     public String dataNascimento;

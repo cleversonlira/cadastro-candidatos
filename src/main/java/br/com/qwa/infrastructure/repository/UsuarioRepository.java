@@ -8,4 +8,7 @@ import javax.enterprise.context.ApplicationScoped;
 @ApplicationScoped
 public class UsuarioRepository implements PanacheRepository<Usuario> {
 
+    public Usuario findByUsername(String username) {
+        return find("username", username).firstResult();
+    }
 }
