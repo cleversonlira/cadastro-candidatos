@@ -7,6 +7,7 @@ import io.quarkus.logging.Log;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.ws.rs.core.Response;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -122,8 +123,20 @@ public class CandidatoSQLRepository implements CanditadoRepository {
     }
 
     @Override
-    public void inserirLista(List<Candidato> candidatos) {
-        candidatos.forEach(this::inserir);
+    public Optional<List<Candidato>> inserirLista(List<Candidato> candidatos) {
+        Log.info("[CANDIDATO-REPOSITORY] Inserindo candidatos...");
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(INSERIR)) {
+            for (Candidato candidato : candidatos) {
+                preencherQuery(candidato, statement);
+                statement.addBatch();
+            }
+            statement.executeBatch();
+            return Optional.of(candidatos);
+        } catch (SQLException e) {
+            Log.info("[CANDIDATO-REPOSITORY] Erro ao inserir candidatos!!", e);
+            return Optional.ofNullable(null);
+        }
     }
 
     @Override

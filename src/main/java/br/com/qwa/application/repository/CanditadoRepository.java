@@ -15,7 +15,7 @@ public interface CanditadoRepository {
 
     Optional<Candidato> inserir(Candidato candidato);
 
-    void inserirLista(List<Candidato> candidatos);
+    Optional<List<Candidato>> inserirLista(List<Candidato> candidatos);
 
     Optional<Candidato> atualizar(String cpf, Candidato candidato);
 
