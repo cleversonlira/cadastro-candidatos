@@ -1,8 +1,8 @@
 package br.com.qwa.application.service;
 
+import br.com.qwa.application.dto.CandidatoDTO;
 import br.com.qwa.application.repository.CanditadoRepository;
 import br.com.qwa.domain.Candidato;
-import br.com.qwa.application.dto.CandidatoDTO;
 
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
@@ -39,32 +39,32 @@ public class CandidatoService {
 
     public Response obterPorCpf(String cpf) {
         Optional<Candidato> candidato = repository.obterPorCpf(cpf);
-        if (candidato.isPresent()) {
-            return Response.ok(new CandidatoDTO(candidato.get())).status(200).build();
-        }
-        return Response.status(NOT_FOUND).build();
+        return (candidato.isPresent())
+                ? Response.ok(new CandidatoDTO(candidato.get())).status(200).build()
+                : Response.status(NOT_FOUND).build();
     }
 
     @RolesAllowed("administrador")
     public Response inserir(@Valid CandidatoDTO dto) {
-        if (repository.inserir(dto.toEntity()).isPresent()) {
-            return Response.ok(dto).build();
-        }
-        return Response.status(BAD_REQUEST).build();
+        return (repository.inserir(dto.toEntity()).isPresent())
+                ? Response.ok(dto).build()
+                : Response.status(BAD_REQUEST).build();
     }
 
     @RolesAllowed("administrador")
     public Response inserirLista(@Valid List<CandidatoDTO> dtoList) {
-        repository.inserirLista(dtoList.stream().map(CandidatoDTO::toEntity).toList());
-        return Response.status(OK).build();
+        Optional<List<Candidato>> candidatosInseridos =
+                repository.inserirLista(dtoList.stream().map(CandidatoDTO::toEntity).toList());
+        return (candidatosInseridos.isPresent())
+                ? Response.status(OK).build()
+                : Response.serverError().build();
     }
 
     @RolesAllowed("administrador")
     public Response atualizar(String cpf, @Valid CandidatoDTO dto) {
-        if (repository.atualizar(cpf, dto.toEntity()).isPresent()) {
-            return Response.ok(dto).build();
-        }
-        return Response.status(NOT_ACCEPTABLE).build();
+        return (repository.atualizar(cpf, dto.toEntity()).isPresent())
+                ? Response.ok(dto).build()
+                : Response.status(NOT_ACCEPTABLE).build();
     }
 
     @RolesAllowed("administrador")
