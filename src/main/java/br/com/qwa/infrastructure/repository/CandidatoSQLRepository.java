@@ -132,6 +132,7 @@ public class CandidatoSQLRepository implements CanditadoRepository {
                 statement.addBatch();
             }
             statement.executeBatch();
+            Log.info("[CANDIDATO-REPOSITORY] Candidatos inseridos com sucesso!");
             return Optional.of(candidatos);
         } catch (SQLException e) {
             Log.info("[CANDIDATO-REPOSITORY] Erro ao inserir candidatos!!", e);
