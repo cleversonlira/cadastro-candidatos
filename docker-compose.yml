@@ -1,0 +1,23 @@
+version: "3.9"
+services:
+  #Container do MySQL
+  mysqlsrv:
+    container_name: mysql_candidatos
+    image: mysql:5.7
+    volumes:
+      - /home/lira/docker/volumes/mysql:/var/lib/mysql-files
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: db_candidatos
+    ports:
+      - "3306:3306"
+
+  #Container do Keycloak
+  keycloak_ifood:
+    container_name: keycloak_candidatos
+    image: jboss/keycloak:16.1.0
+    environment:
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: admin
+    ports:
+      - "8180:8080"
